@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
 )
 
 func pow(n, m int) int {
@@ -159,6 +162,58 @@ func NewLinearGen(conf [size]int) LinearLifeGen {
 	return LinearLifeGen{config: conf}
 }
 
+type LinGen struct {
+	X int
+	A int
+	B int
+	P int
+}
+
+func (l * LinGen) step() {
+	l.X = (l.A * l.X + l.B) % l.P
+}
+
+func (l *LinGen) Gen(count int) []int {
+	res := make([]int, count)
+	for i := 0; i < count; i++ {
+		res[i] = l.X
+		l.step()
+	}
+	return res
+}
+
+func toString(slice []bool) string {
+	res := make([]string, len(slice))
+	for i := range slice {
+		if slice[i] {
+			res[i] = "1"
+		} else {
+			res[i] = "0"
+		}
+	}
+
+	return strings.Join(res, "")
+}
+
+func notSlice(slice []bool) []bool {
+	res := make([]bool, len(slice))
+	for i := range slice {
+		res[i] = !slice[i]
+	}
+
+	return res
+}
+
+func tueMors() {
+	file, _ := os.Create("Туэ-Морс.txt")
+	cur := []bool{false}
+	file.WriteString(toString(cur) + "\n")
+	for i := 0; i < 10; i++ {
+		cur = append(cur, notSlice(cur)...)
+		file.WriteString(toString(cur) + "\n")
+	}
+}
+
 // 08.01.2001
 // 0 - 0000
 // 8 - 1000
@@ -169,16 +224,20 @@ func NewLinearGen(conf [size]int) LinearLifeGen {
 // 0 - 0000
 // 1 - 0000
 func main() {
-	// life := NewLife()
-	// fmt.Println(life.String())
-	// life.Step()
-	// fmt.Println(life.String())
 	conf := [size]int{0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 0,0,0,1, 0,0,1,0, 0,0,0,0, 0,0,0,0, 0,0,0,1, 0}
 	life := NewLinearGen(conf)
 	for _, num := range life.Generate(100) {
 		fmt.Println(num)
 	}
-	// for _, num := range life.Generate(100) {
-	// 	fmt.Println(num)
-	// }
+	fmt.Println("Закончили с игрой жизнь")
+	linGen := LinGen{A: 13, B: 29, P: 41, X: 3}
+	var res []string
+	for _, num := range linGen.Gen(100) {
+		fmt.Println(num)
+		res = append(res, strconv.FormatInt(int64(num), 2))
+	}
+	fmt.Println(strings.Join(res, ""))
+	fmt.Println("Закончили с линейным конгруэнтным")
+
+	tueMors()
 }
